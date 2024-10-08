@@ -1,7 +1,7 @@
 package main
 
 import (
-	proto "ITUServer/grpc"
+	proto "ChittyChat/grpc"
 	"context"
 	"log"
 

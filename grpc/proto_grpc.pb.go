@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.0--rc1
-// source: proto.proto
+// source: grpc/proto.proto
 
 package proto
 
@@ -117,5 +117,5 @@ var ChittyChat_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto.proto",
+	Metadata: "grpc/proto.proto",
 }

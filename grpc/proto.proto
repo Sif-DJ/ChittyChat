@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "ITUServer/grpc/proto";
+option go_package = "ChittyChat/grpc/proto";
 
 message Message {
     string text = 1;

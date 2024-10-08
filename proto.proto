@@ -1,0 +1,13 @@
+syntax = "proto3";
+option go_package = "ITUServer/grpc/proto";
+
+message Message {
+    string text = 1;
+    int32 timestamp = 2;
+}
+
+message Empty {}
+
+service ChittyChat {
+    rpc Publish(Message) returns (Empty);
+}

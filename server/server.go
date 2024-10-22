@@ -33,7 +33,7 @@ func main() {
 func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*proto.Empty, error) {
 	srv.messages = append(srv.messages, *msg)
 	fmt.Println(msg)
-	return &proto.Empty
+	return new(proto.Empty), nil
 }
 
 func (srv *ChittyChatServer) startServer() {

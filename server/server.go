@@ -12,19 +12,28 @@ import (
 
 type ChittyChatServer struct {
 	proto.UnimplementedChittyChatServer
-	messages []string
+	messages []proto.Message
+}
+
+type testing struct {
+	message string
+	time    int
 }
 
 func main() {
-	srv := &ChittyChatServer{messages: []string{}}
-	srv.messages = append(srv.messages, "First Message")
+	srv := &ChittyChatServer{messages: []proto.Message{}}
+	var message proto.Message
+	message.Text = "this is a test"
+	message.Timestamp = 1
+	srv.messages = append(srv.messages, message)
 
 	srv.startServer()
 }
 
-func (srv *ChittyChatServer) Publish(ctx context.Context, msg string) {
-	srv.messages = append(srv.messages, msg)
+func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*proto.Empty, error) {
+	srv.messages = append(srv.messages, *msg)
 	fmt.Println(msg)
+	return &proto.Empty
 }
 
 func (srv *ChittyChatServer) startServer() {

@@ -17,5 +17,9 @@ func main() {
 
 	client := proto.NewChittyChatClient(conn)
 
-	client.Publish(context.Background(), "Participant [Client_Test] joined ChittyChat")
+	message := new(proto.Message)
+	message.Text = "Participant [Client_Test] joined ChittyChat"
+	message.Timestamp = 0
+
+	client.Publish(context.Background(), message)
 }

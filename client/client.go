@@ -17,9 +17,22 @@ func main() {
 
 	client := proto.NewChittyChatClient(conn)
 
-	message := new(proto.Message)
-	message.Text = "Participant [Client_Test] joined ChittyChat"
-	message.Timestamp = 1
+	nodeName := "RandomNum"
+	var joinReq proto.JoinRequest
+	joinReq.NodeName = nodeName
 
-	client.Publish(context.Background(), message)
+	responseJoin, _ := client.Join(context.Background(), &joinReq)
+	log.Println(responseJoin.Lamport, responseJoin.NodeId, responseJoin.Status)
+
+	// I now wish to disconnect
+
+	var leaveReq proto.LeaveRequest
+	leaveReq.SenderId = nodeName
+
+	responseLeave, _ := client.Leave(context.Background(), &leaveReq)
+	log.Println(responseLeave.Lamport, responseLeave.NodeId, responseLeave.Status)
+}
+
+func logMessages(stream proto.ChittyChat_BroadcastServer) {
+
 }

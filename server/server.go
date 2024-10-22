@@ -15,22 +15,18 @@ type ChittyChatServer struct {
 	messages []proto.Message
 }
 
-type testing struct {
-	message string
-	time    int
-}
-
 func main() {
 	srv := &ChittyChatServer{messages: []proto.Message{}}
 	var message proto.Message
-	message.Text = "this is a test"
-	message.Timestamp = 1
+	message.Text = "The Server is Online!"
+	message.Timestamp = 0
 	srv.messages = append(srv.messages, message)
 
 	srv.startServer()
 }
 
 func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*proto.Empty, error) {
+	msg.Timestamp = int32(len(srv.messages))
 	srv.messages = append(srv.messages, *msg)
 	fmt.Println(msg)
 	return new(proto.Empty), nil

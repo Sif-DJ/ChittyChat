@@ -19,7 +19,7 @@ func main() {
 
 	message := new(proto.Message)
 	message.Text = "Participant [Client_Test] joined ChittyChat"
-	message.Timestamp = 0
+	message.Timestamp = 1
 
 	client.Publish(context.Background(), message)
 }

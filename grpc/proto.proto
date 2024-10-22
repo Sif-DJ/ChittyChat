@@ -2,7 +2,7 @@ syntax = "proto3";
 option go_package = "ChittyChat/grpc/proto";
 
 message Lamport {
-	uint32 time = 1;
+	int32 time = 1;
 	string nodeId = 2;
 }
 

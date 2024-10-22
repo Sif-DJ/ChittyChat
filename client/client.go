@@ -18,11 +18,19 @@ func main() {
 	client := proto.NewChittyChatClient(conn)
 
 	nodeName := "RandomNum"
+	var lamport proto.Lamport
+	lamport.Time = 0
+	lamport.NodeId = nodeName
+
 	var joinReq proto.JoinRequest
 	joinReq.NodeName = nodeName
+	joinReq.Lamport = &lamport
 
 	responseJoin, _ := client.Join(context.Background(), &joinReq)
+	lamport.Time = responseJoin.Lamport.Time
 	log.Println(responseJoin.Lamport, responseJoin.NodeId, responseJoin.Status)
+
+	// I wish to text
 
 	// I now wish to disconnect
 

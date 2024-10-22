@@ -12,7 +12,7 @@ import (
 type ChittyChatServer struct {
 	proto.UnimplementedChittyChatServer
 	messages []proto.Message
-	lamport  int32
+	lamport  proto.Lamport
 }
 
 func main() {
@@ -22,10 +22,12 @@ func main() {
 	srv.messages = append(srv.messages, message)
 
 	srv.startServer()
-	srv.lamport = 0
+	srv.lamport.NodeId = "Server"
+	srv.lamport.Time = 0
 }
 
 func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*proto.PublishResponse, error) {
+	srv.lamport.Time++
 	srv.messages = append(srv.messages, *msg)
 	log.Println(msg)
 	return new(proto.PublishResponse), nil
@@ -43,7 +45,7 @@ func (srv *ChittyChatServer) Join(ctx context.Context, req *proto.JoinRequest) (
 	var msg proto.Message
 	msg.Text = "Participant " + req.NodeName + " joined ChittyChat"
 	msg.Lamport = req.Lamport
-	pubResponse, err := srv.Publish(ctx, &msg)
+	_, err := srv.Publish(ctx, &msg)
 	var response proto.JoinResponse
 	response.NodeId = req.NodeName
 	if err != nil {
@@ -51,7 +53,7 @@ func (srv *ChittyChatServer) Join(ctx context.Context, req *proto.JoinRequest) (
 	} else {
 		response.Status = proto.Status_OK
 	}
-	response.Lamport = pubResponse.Lamport
+	response.Lamport = &srv.lamport
 	return &response, nil
 }
 

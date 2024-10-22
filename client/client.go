@@ -19,7 +19,7 @@ func main() {
 
 	nodeName := "RandomNum"
 	var lamport proto.Lamport
-	lamport.Time = 0
+	lamport.Time = 1
 	lamport.NodeId = nodeName
 
 	var joinReq proto.JoinRequest
@@ -36,6 +36,7 @@ func main() {
 
 	var leaveReq proto.LeaveRequest
 	leaveReq.SenderId = nodeName
+	leaveReq.Lamport = &lamport
 
 	responseLeave, _ := client.Leave(context.Background(), &leaveReq)
 	log.Println(responseLeave.Lamport, responseLeave.NodeId, responseLeave.Status)

@@ -34,7 +34,9 @@ func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*
 }
 
 func (srv *ChittyChatServer) Broadcast(_ *proto.BroadcastSubscription, stream proto.ChittyChat_BroadcastServer) error {
-
+	for i = 0; i < len(srv.messages); i++ {
+		stream.Send(&srv.messages[i])
+	}
 	stream.Send(&srv.messages[len(srv.messages)-1])
 
 	return nil
@@ -62,7 +64,7 @@ func (srv *ChittyChatServer) Leave(ctx context.Context, req *proto.LeaveRequest)
 	var msg proto.Message
 	msg.Text = "Participant " + req.SenderId + " left ChittyChat"
 	msg.Lamport = req.Lamport
-	pubResponse, err := srv.Publish(ctx, &msg)
+	_, err := srv.Publish(ctx, &msg)
 	var response proto.LeaveResponse
 	response.NodeId = req.SenderId
 	if err != nil {
@@ -70,7 +72,7 @@ func (srv *ChittyChatServer) Leave(ctx context.Context, req *proto.LeaveRequest)
 	} else {
 		response.Status = proto.Status_OK
 	}
-	response.Lamport = pubResponse.Lamport
+	response.Lamport = &srv.lamport
 	return &response, nil
 }
 

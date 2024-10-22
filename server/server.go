@@ -31,6 +31,10 @@ func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*
 	return new(proto.Empty), nil
 }
 
+func (srv *ChittyChatServer) GetMessages(ctx context.Context, _ *proto.Empty) ([]proto.Message, error) {
+	return srv.messages, nil
+}
+
 func (srv *ChittyChatServer) startServer() {
 	grpcServer := grpc.NewServer()
 	listener, err := net.Listen("tcp", ":5050")

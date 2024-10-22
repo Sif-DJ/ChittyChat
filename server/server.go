@@ -16,14 +16,14 @@ type ChittyChatServer struct {
 }
 
 func main() {
-	server := &ChittyChatServer{messages: []string{}}
-	server.messages = append(server.messages, "First Message")
+	srv := &ChittyChatServer{messages: []string{}}
+	srv.messages = append(srv.messages, "First Message")
 
-	server.startServer()
+	srv.startServer()
 }
 
-func (server *ChittyChatServer) Publish(ctx context.Context, msg string) {
-	server.messages = append(server.messages, msg)
+func (srv *ChittyChatServer) Publish(ctx context.Context, msg string) {
+	srv.messages = append(srv.messages, msg)
 	fmt.Println(msg)
 }
 

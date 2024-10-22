@@ -3,7 +3,6 @@ package main
 import (
 	proto "ChittyChat/grpc"
 	"context"
-	"fmt"
 	"log"
 	"net"
 
@@ -28,7 +27,7 @@ func main() {
 func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*proto.Empty, error) {
 	msg.Timestamp = int32(len(srv.messages))
 	srv.messages = append(srv.messages, *msg)
-	fmt.Println(msg)
+	log.Println(msg)
 	return new(proto.Empty), nil
 }
 

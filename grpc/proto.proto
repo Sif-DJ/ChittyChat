@@ -10,4 +10,5 @@ message Empty {}
 
 service ChittyChat {
     rpc Publish(Message) returns (Empty);
+    rpc GetMessages(Empty) returns (stream Message);
 }

@@ -3,7 +3,9 @@ package main
 import (
 	proto "ChittyChat/grpc"
 	"context"
+	"fmt"
 	"log"
+	"math/rand"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -17,7 +19,8 @@ func main() {
 
 	client := proto.NewChittyChatClient(conn)
 
-	nodeName := "RandomNum"
+	randomNum := rand.Intn(265)
+	nodeName := fmt.Sprint(randomNum)
 	var lamport proto.Lamport
 	lamport.Time = 1
 	lamport.NodeId = nodeName
@@ -30,7 +33,25 @@ func main() {
 	lamport.Time = responseJoin.Lamport.Time
 	log.Println(responseJoin.Lamport, responseJoin.NodeId, responseJoin.Status)
 
+	// Being logging
+	stream, _ := client.Broadcast(context.Background(), &proto.BroadcastSubscription{
+		Receiver: nodeName,
+	})
+	go logMessages(stream)
+
 	// I wish to text
+	for {
+		var input string
+		fmt.Scanln(&input)
+		if input == "exit" {
+			break
+		}
+		if len(input) <= 128 {
+			publishMessage(client, &lamport, input)
+		} else {
+			fmt.Println("Error: Too many characters in message to send! Max is 128 characters")
+		}
+	}
 
 	// I now wish to disconnect
 
@@ -42,6 +63,24 @@ func main() {
 	log.Println(responseLeave.Lamport, responseLeave.NodeId, responseLeave.Status)
 }
 
-func logMessages(stream proto.ChittyChat_BroadcastServer) {
+func logMessages(stream proto.ChittyChat_BroadcastClient) error {
+	for {
+		msg, err := stream.Recv()
+		if err != nil {
+			return err
+		}
+		log.Println(msg)
+	}
+}
 
+func publishMessage(client proto.ChittyChatClient, lamport *proto.Lamport, text string) {
+
+	msg := &proto.Message{
+		Text:    text,
+		Lamport: lamport,
+	}
+	response, _ := client.Publish(context.Background(), msg)
+
+	//lamport.Time = response.Lamport.Time
+	log.Println("Message published. Status: " + response.Status.String())
 }

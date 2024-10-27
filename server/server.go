@@ -11,8 +11,9 @@ import (
 
 type ChittyChatServer struct {
 	proto.UnimplementedChittyChatServer
-	messages []proto.Message
-	lamport  proto.Lamport
+	messages      []proto.Message
+	lamport       proto.Lamport
+	broadcastChan chan *proto.Message
 }
 
 func main() {
@@ -30,16 +31,30 @@ func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*
 	srv.lamport.Time++
 	srv.messages = append(srv.messages, *msg)
 	log.Println(msg)
-	return new(proto.PublishResponse), nil
+	response := proto.PublishResponse{
+		Lamport: &srv.lamport,
+		Status:  proto.Status_OK,
+	}
+	return &response, nil
 }
 
 func (srv *ChittyChatServer) Broadcast(_ *proto.BroadcastSubscription, stream proto.ChittyChat_BroadcastServer) error {
-	for i = 0; i < len(srv.messages); i++ {
+	for {
+		select {
+		case <-stream.Context().Done():
+			return nil
+		case msg := <-srv.broadcastChan:
+			if err := stream.Send(msg); err != nil {
+				return err
+			}
+		}
+	}
+
+	/*for i := 0; i < len(srv.messages); i++ {
 		stream.Send(&srv.messages[i])
 	}
 	stream.Send(&srv.messages[len(srv.messages)-1])
-
-	return nil
+	return nil*/
 }
 
 func (srv *ChittyChatServer) Join(ctx context.Context, req *proto.JoinRequest) (*proto.JoinResponse, error) {

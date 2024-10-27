@@ -2,10 +2,13 @@ package main
 
 import (
 	proto "ChittyChat/grpc"
+	"bufio"
 	"context"
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -42,12 +45,14 @@ func main() {
 	// I wish to text
 	for {
 		var input string
-		fmt.Scanln(&input)
-		if input == "exit" {
+		reader := bufio.NewReader(os.Stdin)
+		input, _ = reader.ReadString('\n')
+		before, _, _ := strings.Cut(input, "\r\n")
+		if before == "exit" {
 			break
 		}
-		if len(input) <= 128 {
-			publishMessage(client, &lamport, input)
+		if len(before) <= 128 {
+			publishMessage(client, &lamport, before)
 		} else {
 			fmt.Println("Error: Too many characters in message to send! Max is 128 characters")
 		}
@@ -81,6 +86,6 @@ func publishMessage(client proto.ChittyChatClient, lamport *proto.Lamport, text 
 	}
 	response, _ := client.Publish(context.Background(), msg)
 
-	//lamport.Time = response.Lamport.Time
+	lamport.Time = response.Lamport.Time
 	log.Println("Message published. Status: " + response.Status.String())
 }

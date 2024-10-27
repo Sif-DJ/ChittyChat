@@ -11,20 +11,23 @@ import (
 
 type ChittyChatServer struct {
 	proto.UnimplementedChittyChatServer
-	messages      []proto.Message
-	lamport       proto.Lamport
-	broadcastChan chan *proto.Message
+	messages []proto.Message
+	lamport  proto.Lamport
 }
 
 func main() {
-	srv := &ChittyChatServer{messages: []proto.Message{}}
+	srv := &ChittyChatServer{
+		messages: []proto.Message{},
+		lamport: proto.Lamport{
+			NodeId: "Server",
+			Time:   0,
+		},
+	}
 	var message proto.Message
 	message.Text = "The Server is Online!"
 	srv.messages = append(srv.messages, message)
 
 	srv.startServer()
-	srv.lamport.NodeId = "Server"
-	srv.lamport.Time = 0
 }
 
 func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*proto.PublishResponse, error) {
@@ -39,22 +42,11 @@ func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*
 }
 
 func (srv *ChittyChatServer) Broadcast(_ *proto.BroadcastSubscription, stream proto.ChittyChat_BroadcastServer) error {
-	for {
-		select {
-		case <-stream.Context().Done():
-			return nil
-		case msg := <-srv.broadcastChan:
-			if err := stream.Send(msg); err != nil {
-				return err
-			}
-		}
-	}
-
-	/*for i := 0; i < len(srv.messages); i++ {
+	for i := 0; i < len(srv.messages); i++ {
 		stream.Send(&srv.messages[i])
 	}
 	stream.Send(&srv.messages[len(srv.messages)-1])
-	return nil*/
+	return nil
 }
 
 func (srv *ChittyChatServer) Join(ctx context.Context, req *proto.JoinRequest) (*proto.JoinResponse, error) {

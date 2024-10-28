@@ -32,6 +32,7 @@ func main() {
 
 func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*proto.PublishResponse, error) {
 	srv.lamport.Time++
+	msg.Lamport.Time = srv.lamport.Time
 	srv.messages = append(srv.messages, *msg)
 	log.Println(msg)
 	response := proto.PublishResponse{
@@ -42,10 +43,14 @@ func (srv *ChittyChatServer) Publish(ctx context.Context, msg *proto.Message) (*
 }
 
 func (srv *ChittyChatServer) Broadcast(_ *proto.BroadcastSubscription, stream proto.ChittyChat_BroadcastServer) error {
-	for i := 0; i < len(srv.messages); i++ {
-		stream.Send(&srv.messages[i])
+	var current = 0
+	for {
+		for i := current; i < len(srv.messages); i++ {
+			stream.Send(&srv.messages[i])
+			current++
+		}
 	}
-	stream.Send(&srv.messages[len(srv.messages)-1])
+	//stream.Send(&srv.messages[len(srv.messages)-1])
 	return nil
 }
 
@@ -54,6 +59,7 @@ func (srv *ChittyChatServer) Join(ctx context.Context, req *proto.JoinRequest) (
 	var msg proto.Message
 	msg.Text = "Participant " + req.NodeName + " joined ChittyChat"
 	msg.Lamport = req.Lamport
+	msg.Lamport.Time = srv.lamport.Time
 	_, err := srv.Publish(ctx, &msg)
 	var response proto.JoinResponse
 	response.NodeId = req.NodeName
@@ -71,6 +77,7 @@ func (srv *ChittyChatServer) Leave(ctx context.Context, req *proto.LeaveRequest)
 	var msg proto.Message
 	msg.Text = "Participant " + req.SenderId + " left ChittyChat"
 	msg.Lamport = req.Lamport
+	msg.Lamport.Time = srv.lamport.Time
 	_, err := srv.Publish(ctx, &msg)
 	var response proto.LeaveResponse
 	response.NodeId = req.SenderId

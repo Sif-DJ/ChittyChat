@@ -49,11 +49,11 @@ func main() {
 		reader := bufio.NewReader(os.Stdin)
 		input, _ = reader.ReadString('\n')
 		before, _, _ := strings.Cut(input, "\r\n")
-		lamport.Time++
 		if before == "exit" {
 			break
 		}
 		if len(before) <= 128 {
+			lamport.Time++
 			publishMessage(client, &lamport, before)
 		} else {
 			fmt.Println("Error: Too many characters in message to send! Max is 128 characters")

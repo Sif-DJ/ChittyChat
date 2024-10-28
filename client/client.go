@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"unicode/utf8"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -52,7 +53,7 @@ func main() {
 		if before == "exit" {
 			break
 		}
-		if len(before) <= 128 {
+		if len(before) <= 128 && utf8.ValidString(before) {
 			lamport.Time++
 			publishMessage(client, &lamport, before)
 		} else {

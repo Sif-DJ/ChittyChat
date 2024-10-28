@@ -14,6 +14,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+var lamport proto.Lamport
+
 func main() {
 	conn, err := grpc.NewClient("localhost:5050", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -22,9 +24,8 @@ func main() {
 
 	client := proto.NewChittyChatClient(conn)
 
-	randomNum := rand.Intn(265)
+	randomNum := rand.Intn(256)
 	nodeName := fmt.Sprint(randomNum)
-	var lamport proto.Lamport
 	lamport.Time = 1
 	lamport.NodeId = nodeName
 
@@ -48,6 +49,7 @@ func main() {
 		reader := bufio.NewReader(os.Stdin)
 		input, _ = reader.ReadString('\n')
 		before, _, _ := strings.Cut(input, "\r\n")
+		lamport.Time++
 		if before == "exit" {
 			break
 		}
@@ -74,7 +76,9 @@ func logMessages(stream proto.ChittyChat_BroadcastClient) error {
 		if err != nil {
 			return err
 		}
-		log.Println(msg)
+		var _temp = msg.Lamport
+		lamport.Time = _temp.Time
+		fmt.Println(msg.Lamport, ":", msg.Text)
 	}
 }
 
@@ -87,5 +91,4 @@ func publishMessage(client proto.ChittyChatClient, lamport *proto.Lamport, text 
 	response, _ := client.Publish(context.Background(), msg)
 
 	lamport.Time = response.Lamport.Time
-	log.Println("Message published. Status: " + response.Status.String())
 }

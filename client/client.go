@@ -89,7 +89,10 @@ func publishMessage(client proto.ChittyChatClient, lamport *proto.Lamport, text 
 		Text:    text,
 		Lamport: lamport,
 	}
-	response, _ := client.Publish(context.Background(), msg)
-
+	response, err := client.Publish(context.Background(), msg)
+	if err != nil {
+		log.Println("server is down")
+		return
+	}
 	lamport.Time = response.Lamport.Time
 }
